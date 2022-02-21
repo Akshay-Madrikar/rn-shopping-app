@@ -1,11 +1,19 @@
 import React from 'react';
-import { FlatList, Text } from 'react-native';
-import { useSelector } from 'react-redux';
-import ProductItem from '../../components/shop/Productitem';
+import { FlatList, Platform } from 'react-native';
+import {
+  HeaderButtons,
+  Item,
+  HeaderButton,
+} from 'react-navigation-header-buttons';
+import { useSelector, useDispatch } from 'react-redux';
+
+import ProductItem from '../../components/shop/ProductItem';
+import CustomHeaderButton from '../../components/UI/HeaderButton';
+import * as cartActions from '../../store/actions/cart';
 
 const ProductsOverviewScreen = (props) => {
   const products = useSelector((state) => state.products.availableProducts);
-
+  const dispatch = useDispatch();
   // keyExtractor indicates unique key for given array based on 'id' field
   // New RN version doesn't need keyExtractor attr as it handles internally
   return (
@@ -23,15 +31,30 @@ const ProductsOverviewScreen = (props) => {
               productTitle: itemData.item.title,
             });
           }}
-          onAddToCart={() => {}}
+          onAddToCart={() => {
+            dispatch(cartActions.addToCart(itemData.item));
+          }}
         />
       )}
     />
   );
 };
 
-ProductsOverviewScreen.navigationOptions = {
-  headerTitle: 'All Products',
+ProductsOverviewScreen.navigationOptions = (navData) => {
+  return {
+    headerTitle: 'All Products',
+    headerRight: () => (
+      <HeaderButtons HeaderButtonComponent={CustomHeaderButton}>
+        <Item
+          title="Cart"
+          iconName={Platform.OS == 'android' ? 'md-cart' : 'ios-cart'}
+          onPress={() => {
+            navData.navigation.navigate('Cart');
+          }}
+        />
+      </HeaderButtons>
+    ),
+  };
 };
 
 export default ProductsOverviewScreen;
