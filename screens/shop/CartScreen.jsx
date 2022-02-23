@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import CartItem from '../../components/shop/CartItem';
 import Colors from '../../constants/Colors';
 import * as cartActions from '../../store/actions/cart';
+import * as orderActions from '../../store/actions/order';
 
 const CartScreen = (props) => {
   const cartTotalAmount = useSelector((state) => state.cart.totalAmount);
@@ -28,15 +29,30 @@ const CartScreen = (props) => {
 
   return (
     <View style={styles.screen}>
+      <View style={styles.orderButton}>
+        <Button
+          color={Colors.primary}
+          title="View all orders"
+          onPress={() => {
+            props.navigation.navigate('Orders');
+          }}
+        />
+      </View>
+
       <View style={styles.summary}>
         <Text style={styles.summaryText}>
           Total:{' '}
-          <Text style={styles.amount}>${cartTotalAmount.toFixed(2)}</Text>
+          <Text style={styles.amount}>
+            ${Math.round(cartTotalAmount.toFixed(2) * 100) / 100}
+          </Text>
         </Text>
         <Button
           color={Colors.accent}
           title="Order Now"
           disabled={cartItems.length == 0}
+          onPress={() => {
+            dispatch(orderActions.addOrder(cartItems, cartTotalAmount));
+          }}
         />
       </View>
       <View>
@@ -48,6 +64,7 @@ const CartScreen = (props) => {
               quantity={itemData.item.quantity}
               title={itemData.item.productTitle}
               amount={itemData.item.sum}
+              deletable
               onRemove={() => {
                 dispatch(cartActions.removeFromCart(itemData.item.productId));
               }}
@@ -84,6 +101,21 @@ const styles = StyleSheet.create({
   amount: {
     color: Colors.primary,
   },
+  orderButton: {
+    width: '40%',
+    marginVertical: 20,
+    shadowColor: 'black',
+    shadowOpacity: 0.26,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
+    elevation: 5, // Need to add as in android shawdow doesn't work
+    borderRadius: 10,
+    backgroundColor: 'white',
+  },
 });
+
+CartScreen.navigationOptions = {
+  headerTitle: 'Your Cart',
+};
 
 export default CartScreen;
